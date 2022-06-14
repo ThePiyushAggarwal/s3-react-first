@@ -1,4 +1,6 @@
 const aws = require('aws-sdk')
+const User = require('./models/user.model')
+const { v4 } = require('uuid')
 
 const s3 = new aws.S3({
   region: 'us-west-2',
@@ -7,12 +9,20 @@ const s3 = new aws.S3({
   signatureVersion: 'v4',
 })
 
-async function generateUploadUrl(imageName) {
+async function generateUploadUrl(id) {
+  const Key = v4()
+
   const params = {
     Bucket: 'myfirstawsbucketsoftseekers',
-    Key: imageName,
+    Key,
     Expires: 60,
   }
+
+  await User.findByIdAndUpdate(
+    id,
+    { $push: { imageUrls: [Key] } },
+    { new: true.valueOf, upsert: true }
+  )
 
   const uploadURL = await s3.getSignedUrlPromise('putObject', params)
   return uploadURL

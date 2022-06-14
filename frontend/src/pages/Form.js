@@ -1,8 +1,16 @@
 import axios from 'axios'
-import { useState } from 'react'
+import { gql, useQuery } from '@apollo/client'
+
+const GET_IMAGE = gql`
+  query {
+    getAllUser {
+      imageUrls
+    }
+  }
+`
 
 function Form() {
-  const [url, setUrl] = useState('')
+  const { data, refetch } = useQuery(GET_IMAGE)
 
   const onSubmit = (e) => {
     e.preventDefault()
@@ -16,23 +24,30 @@ function Form() {
 
     axios
       .post('http://localhost:5000/s3url', {
-        name: data.name,
+        id: '62a8089b1a6225108d7d2a56',
       })
       .then((res) => {
-        axios.put(res.data.url, data, config).then(() => setUrl(res.data.url))
+        axios.put(res.data.url, data, config).then((x) => refetch())
       })
   }
 
   return (
     <>
       <form onSubmit={onSubmit}>
-        <input type="file" accept="image/png, image/jpeg" />
-        <button type="submit">Submit File</button>
+        <input type='file' accept='image/png, image/jpeg' />
+        <button type='submit'>Submit File</button>
       </form>
 
-      {url && (
-        <img src={url.split('?')[0]} height="500" width="500" alt="avatar" />
-      )}
+      {data &&
+        data?.getAllUser[0]?.imageUrls.map((image) => (
+          <img
+            src={`${process.env.REACT_APP_AWS_BASE_URI}${image}`}
+            height='250'
+            width='250'
+            alt='avatar'
+            key={image}
+          />
+        ))}
     </>
   )
 }
