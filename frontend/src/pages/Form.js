@@ -20,21 +20,25 @@ function Form() {
       },
     }
 
-    const data = e.target[0].files[0]
+    const data = Array.from(e.target[0].files)
 
-    axios
-      .post('http://localhost:5000/s3url', {
-        id: '62a8089b1a6225108d7d2a56',
-      })
-      .then((res) => {
-        axios.put(res.data.url, data, config).then((x) => refetch())
-      })
+    console.log(data)
+
+    data.map((file) =>
+      axios
+        .post('http://localhost:5000/s3url', {
+          id: '62a8089b1a6225108d7d2a56',
+        })
+        .then((res) => {
+          axios.put(res.data.url, file, config).then(() => refetch())
+        })
+    )
   }
 
   return (
     <>
       <form onSubmit={onSubmit}>
-        <input type='file' accept='image/png, image/jpeg' />
+        <input type='file' accept='image/png, image/jpeg' multiple />
         <button type='submit'>Submit File</button>
       </form>
 
