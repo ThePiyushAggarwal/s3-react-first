@@ -4,8 +4,8 @@ const typeDefs = gql`
   type User {
     id: ID
     fName: String
-    image: String
     imageUrls: [String]
+    imageUrls2: [String]
   }
 
   type Query {

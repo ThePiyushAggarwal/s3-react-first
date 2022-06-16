@@ -36,7 +36,9 @@ async function startApolloServer() {
   app.use(express.json())
 
   app.post('/s3url', async (req, res) => {
-    const url = await generateUploadUrl(req.body.id)
+    const { id, field } = req.body
+
+    const url = await generateUploadUrl(id, field)
     res.send({ url })
   })
 

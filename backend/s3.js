@@ -9,7 +9,7 @@ const s3 = new aws.S3({
   signatureVersion: 'v4',
 })
 
-async function generateUploadUrl(id) {
+async function generateUploadUrl(id, field) {
   const Key = v4()
 
   const params = {
@@ -18,11 +18,19 @@ async function generateUploadUrl(id) {
     Expires: 60,
   }
 
-  await User.findByIdAndUpdate(
-    id,
-    { $push: { imageUrls: [Key] } },
-    { new: true.valueOf, upsert: true }
-  )
+  if (field === 'imageUrls') {
+    await User.findByIdAndUpdate(
+      id,
+      { $push: { imageUrls: [Key] } },
+      { new: true.valueOf, upsert: true }
+    )
+  } else {
+    await User.findByIdAndUpdate(
+      id,
+      { $push: { imageUrls2: [Key] } },
+      { new: true.valueOf, upsert: true }
+    )
+  }
 
   const uploadURL = await s3.getSignedUrlPromise('putObject', params)
   return uploadURL

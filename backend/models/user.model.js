@@ -5,6 +5,9 @@ const userSchema = mongoose.Schema({
   imageUrls: {
     type: [String],
   },
+  imageUrls2: {
+    type: [String],
+  },
 })
 
 module.exports = mongoose.model('User', userSchema)
