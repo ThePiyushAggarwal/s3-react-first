@@ -21,7 +21,7 @@ async function generateUploadUrl(id) {
   await User.findByIdAndUpdate(
     id,
     { $push: { imageUrls: [Key] } },
-    { new: true.valueOf, upsert: true }
+    { new: true, upsert: true }
   )
 
   const uploadURL = await s3.getSignedUrlPromise('putObject', params)
