@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { gql, useQuery } from '@apollo/client'
+import { useState } from 'react'
 
 const GET_IMAGE = gql`
   query {
@@ -12,6 +13,8 @@ const GET_IMAGE = gql`
 
 function Form() {
   const { data, refetch } = useQuery(GET_IMAGE)
+  const [loading, setLoading] = useState([])
+  const [error, setError] = useState(null)
 
   const onSubmit = (e) => {
     e.preventDefault()
@@ -19,13 +22,20 @@ function Form() {
   }
 
   const onChangeUpload = (e) => {
+    const data = e.target.files[0]
+
+    console.log(data)
+    if (!data) {
+      return
+    }
+
+    setLoading(loading.concat(e.target.id))
+
     const config = {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     }
-
-    const data = e.target.files[0]
 
     axios
       .post('http://localhost:5000/s3url', {
@@ -33,8 +43,19 @@ function Form() {
         field: e.target.id,
       })
       .then((res) => {
-        axios.put(res.data.url, data, config).then(() => refetch())
+        console.log(res.data)
+        axios
+          .put(res.data.uploadURL, data, config)
+          .then(() => {
+            refetch()
+            setLoading(loading.splice(loading.indexOf(e.target.id), 1))
+          })
+          .catch((err) => setError(err))
       })
+  }
+
+  if (error) {
+    return <p>Something went wrong. Please try again later.</p>
   }
 
   return (
@@ -46,12 +67,18 @@ function Form() {
           onChange={onChangeUpload}
           id='imageUrls'
         />
+        {loading.some((x) => x === 'imageUrls') && (
+          <p>Wait for the upload biatch!</p>
+        )}
         <input
           type='file'
           accept='image/png, image/jpeg'
           onChange={onChangeUpload}
           id='imageUrls2'
         />
+        {loading.some((x) => x === 'imageUrls2') && (
+          <p>Wait for the upload biatch!</p>
+        )}
         <button type='submit'>Submit File</button>
       </form>
       <p>imageUrls</p>

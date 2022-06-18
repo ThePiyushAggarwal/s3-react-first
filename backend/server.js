@@ -38,8 +38,8 @@ async function startApolloServer() {
   app.post('/s3url', async (req, res) => {
     const { id, field } = req.body
 
-    const url = await generateUploadUrl(id, field)
-    res.send({ url })
+    const { uploadURL, Key } = await generateUploadUrl(id, field)
+    res.send({ uploadURL })
   })
 
   server.applyMiddleware({ app })
